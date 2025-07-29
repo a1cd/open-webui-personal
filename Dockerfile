@@ -121,7 +121,8 @@ RUN apt-get update && \
 COPY --chown=$UID:$GID ./backend/requirements.txt ./requirements.txt
 
 RUN pip3 install --no-cache-dir uv && \
-    uv pip install --system -r requirements.txt --no-cache-dir; \
+    uv pip install --system -r requirements.txt --no-cache-dir && \
+    mkdir -p /app/backend/data/ && \
     chown -R $UID:$GID /app/backend/data/
 
 
