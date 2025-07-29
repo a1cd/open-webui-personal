@@ -511,7 +511,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
             log.exception(e)
             raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
-        import torch
+        from torch import tensor
         import soundfile as sf
 
         load_speech_pipeline(request)
@@ -526,7 +526,7 @@ async def speech(request: Request, user=Depends(get_verified_user)):
         except Exception:
             pass
 
-        speaker_embedding = torch.tensor(
+        speaker_embedding = tensor(
             embeddings_dataset[speaker_index]["xvector"]
         ).unsqueeze(0)
 

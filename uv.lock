@@ -2187,6 +2187,18 @@ wheels = [
 ]
 
 [[package]]
+name = "memory-profiler"
+version = "0.61.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "psutil" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b2/88/e1907e1ca3488f2d9507ca8b0ae1add7b1cd5d3ca2bc8e5b329382ea2c7b/memory_profiler-0.61.0.tar.gz", hash = "sha256:4e5b73d7864a1d1292fb76a03e82a3e78ef934d06828a698d9dada76da2067b0", size = 35935, upload-time = "2022-11-15T17:57:28.994Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/26/aaca612a0634ceede20682e692a6c55e35a94c21ba36b807cc40fe910ae1/memory_profiler-0.61.0-py3-none-any.whl", hash = "sha256:400348e61031e3942ad4d4109d18753b2fb08c2f6fb8290671c5513a34182d84", size = 31803, upload-time = "2022-11-15T17:57:27.031Z" },
+]
+
+[[package]]
 name = "milvus-lite"
 version = "2.4.11"
 source = { registry = "https://pypi.org/simple" }
@@ -2238,15 +2250,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/9b/fd/eb1a3573cda74d4c2381d10ded62c128e869954ced1881c15e2bcd97a48f/mmh3-5.0.1-cp312-cp312-win32.whl", hash = "sha256:842516acf04da546f94fad52db125ee619ccbdcada179da51c326a22c4578cb9", size = 39206, upload-time = "2024-09-22T16:45:58.293Z" },
     { url = "https://files.pythonhosted.org/packages/66/e8/542ed252924002b84c43a68a080cfd4facbea0d5df361e4f59637638d3c7/mmh3-5.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:d963be0dbfd9fca209c17172f6110787ebf78934af25e3694fe2ba40e55c1e2b", size = 39799, upload-time = "2024-09-22T16:45:59.235Z" },
     { url = "https://files.pythonhosted.org/packages/bd/25/ff2cd36c82a23afa57a05cdb52ab467a911fb12c055c8a8238c0d426cbf0/mmh3-5.0.1-cp312-cp312-win_arm64.whl", hash = "sha256:a5da292ceeed8ce8e32b68847261a462d30fd7b478c3f55daae841404f433c15", size = 36537, upload-time = "2024-09-22T16:46:00.2Z" },
-]
-
-[[package]]
-name = "monotonic"
-version = "1.6"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ea/ca/8e91948b782ddfbd194f323e7e7d9ba12e5877addf04fb2bf8fca38e86ac/monotonic-1.6.tar.gz", hash = "sha256:3a55207bcfed53ddd5c5bae174524062935efed17792e9de2ad0205ce9ad63f7", size = 7615, upload-time = "2021-08-11T14:37:28.79Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/67/7e8406a29b6c45be7af7740456f7f37025f0506ae2e05fb9009a53946860/monotonic-1.6-py2.py3-none-any.whl", hash = "sha256:68687e19a14f11f26d140dd5c86f3dba4bf5df58003000ed467e0e2a69bca96c", size = 8154, upload-time = "2021-04-09T21:58:05.122Z" },
 ]
 
 [[package]]
@@ -2658,6 +2661,7 @@ dependencies = [
     { name = "ldap3" },
     { name = "loguru" },
     { name = "markdown" },
+    { name = "memory-profiler" },
     { name = "moto", extra = ["s3"] },
     { name = "nltk" },
     { name = "onnxruntime" },
@@ -2673,6 +2677,7 @@ dependencies = [
     { name = "pillow" },
     { name = "pinecone" },
     { name = "playwright" },
+    { name = "posthog" },
     { name = "psutil" },
     { name = "psycopg2-binary" },
     { name = "pycrdt" },
@@ -2767,6 +2772,7 @@ requires-dist = [
     { name = "ldap3", specifier = "==2.9.1" },
     { name = "loguru", specifier = "==0.7.3" },
     { name = "markdown", specifier = "==3.7" },
+    { name = "memory-profiler", specifier = "==0.61.0" },
     { name = "moto", extras = ["s3"], specifier = ">=5.0.26" },
     { name = "nltk", specifier = "==3.9.1" },
     { name = "onnxruntime", specifier = "==1.20.1" },
@@ -2782,6 +2788,7 @@ requires-dist = [
     { name = "pillow", specifier = "==11.2.1" },
     { name = "pinecone", specifier = "==6.0.2" },
     { name = "playwright", specifier = "==1.49.1" },
+    { name = "posthog", specifier = "==5.4.0" },
     { name = "psutil" },
     { name = "psycopg2-binary", specifier = "==2.9.9" },
     { name = "pycrdt", specifier = "==0.12.25" },
@@ -3278,18 +3285,18 @@ wheels = [
 
 [[package]]
 name = "posthog"
-version = "3.8.3"
+version = "5.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backoff" },
-    { name = "monotonic" },
+    { name = "distro" },
     { name = "python-dateutil" },
     { name = "requests" },
     { name = "six" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/51/5a/057ebd6b279940e2cf2cbe8b10a4b34bc832f6f82b10649dcd12210219e9/posthog-3.8.3.tar.gz", hash = "sha256:263df03ea312d4b47a3d5ea393fdb22ff2ed78140d5ce9af9dd0618ae245a44b", size = 56864, upload-time = "2025-01-14T09:51:26.523Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/48/20/60ae67bb9d82f00427946218d49e2e7e80fb41c15dc5019482289ec9ce8d/posthog-5.4.0.tar.gz", hash = "sha256:701669261b8d07cdde0276e5bc096b87f9e200e3b9589c5ebff14df658c5893c", size = 88076, upload-time = "2025-06-20T23:19:23.485Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/3a/ff36f067367de4477d114ab04f42d5830849bad1b0949eb70c9858cdb7e2/posthog-3.8.3-py2.py3-none-any.whl", hash = "sha256:7215c4d7649b0c87905b42f460403311564996d776ab48d39852f46539a50f22", size = 64665, upload-time = "2025-01-14T09:51:25.299Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/98/e480cab9a08d1c09b1c59a93dade92c1bb7544826684ff2acbfd10fcfbd4/posthog-5.4.0-py3-none-any.whl", hash = "sha256:284dfa302f64353484420b52d4ad81ff5c2c2d1d607c4e2db602ac72761831bd", size = 105364, upload-time = "2025-06-20T23:19:22.001Z" },
 ]
 
 [[package]]

@@ -1,7 +1,8 @@
-import os
-import logging
-import torch
-import numpy as np
+from os import path, remove
+from logging import getLogger
+from torch import softmax, cuda, max, matmul
+print("imported torch.(softmax, cuda, max, matmul)")
+from numpy import float32
 from colbert.infra import ColBERTConfig
 from colbert.modeling.checkpoint import Checkpoint
 
@@ -9,14 +10,14 @@ from open_webui.env import SRC_LOG_LEVELS
 
 from open_webui.retrieval.models.base_reranker import BaseReranker
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["RAG"])
 
 
 class ColBERT(BaseReranker):
     def __init__(self, name, **kwargs) -> None:
         log.info("ColBERT: Loading model", name)
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = "cuda" if cuda.is_available() else "cpu"
 
         DOCKER = kwargs.get("env") == "docker"
         if DOCKER:
@@ -28,8 +29,8 @@ class ColBERT(BaseReranker):
             lock_file = (
                 "/root/.cache/torch_extensions/py311_cpu/segmented_maxsim_cpp/lock"
             )
-            if os.path.exists(lock_file):
-                os.remove(lock_file)
+            if path.exists(lock_file):
+                remove(lock_file)
 
         self.ckpt = Checkpoint(
             name,
@@ -59,16 +60,16 @@ class ColBERT(BaseReranker):
         # Transpose the query embeddings to align for matrix multiplication
         transposed_query_embeddings = query_embeddings.permute(0, 2, 1)
         # Compute similarity scores using batch matrix multiplication
-        computed_scores = torch.matmul(document_embeddings, transposed_query_embeddings)
+        computed_scores = matmul(document_embeddings, transposed_query_embeddings)
         # Apply max pooling to extract the highest semantic similarity across each document's sequence
-        maximum_scores = torch.max(computed_scores, dim=1).values
+        maximum_scores = max(computed_scores, dim=1).values
 
         # Sum up the maximum scores across features to get the overall document relevance scores
         final_scores = maximum_scores.sum(dim=1)
 
-        normalized_scores = torch.softmax(final_scores, dim=0)
+        normalized_scores = softmax(final_scores, dim=0)
 
-        return normalized_scores.detach().cpu().numpy().astype(np.float32)
+        return normalized_scores.detach().cpu().numpy().astype(float32)
 
     def predict(self, sentences):
 
