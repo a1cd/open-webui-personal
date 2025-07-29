@@ -255,7 +255,7 @@ class AppConfig:
         if self._redis:
             last_update_time = self._update_times.get(key, 0)
             time_since_update = time.time() - last_update_time
-            if time_since_update > 60.0:
+            if time_since_update > 240.0:
                 redis_key = f"{self._redis_key_prefix}:config:{key}"
                 redis_value = self._redis.get(redis_key)
 
