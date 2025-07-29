@@ -39,9 +39,10 @@ USE_CUDA = os.environ.get("USE_CUDA_DOCKER", "false")
 
 if USE_CUDA.lower() == "true":
     try:
-        import torch
+        from torch.cuda import is_available
+        print("importing torch.cuda.is_available()")
 
-        assert torch.cuda.is_available(), "CUDA not available"
+        assert is_available(), "CUDA not available"
         DEVICE_TYPE = "cuda"
     except Exception as e:
         cuda_error = (
@@ -55,9 +56,10 @@ else:
     DEVICE_TYPE = "cpu"
 
 try:
-    import torch
+    from torch.backends.mps import is_available, is_built
+    print("importing torch.backends.mps.is_available()")
 
-    if torch.backends.mps.is_available() and torch.backends.mps.is_built():
+    if is_available() and is_built():
         DEVICE_TYPE = "mps"
 except Exception:
     pass

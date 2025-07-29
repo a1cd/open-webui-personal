@@ -28,10 +28,6 @@ from functools import update_wrapper, partial
 from fastapi import Request
 from pydantic import BaseModel, Field, create_model
 
-from langchain_core.utils.function_calling import (
-    convert_to_openai_function as convert_pydantic_model_to_openai_function_spec,
-)
-
 
 from open_webui.models.tools import Tools
 from open_webui.models.users import UserModel
@@ -321,6 +317,10 @@ def get_functions_from_tool(tool: object) -> list[Callable]:
 def get_tool_specs(tool_module: object) -> list[dict]:
     function_models = map(
         convert_function_to_pydantic_model, get_functions_from_tool(tool_module)
+    )
+
+    from langchain_core.utils.function_calling import (
+        convert_to_openai_function as convert_pydantic_model_to_openai_function_spec,
     )
 
     specs = [

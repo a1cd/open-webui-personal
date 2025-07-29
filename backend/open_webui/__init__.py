@@ -59,9 +59,10 @@ def serve(
             ]
         )
         try:
-            import torch
+            from torch.cuda import is_available
+            print("imported torch.cuda.is_available()")
 
-            assert torch.cuda.is_available(), "CUDA not available"
+            assert is_available(), "CUDA not available"
             typer.echo("CUDA seems to be working")
         except Exception as e:
             typer.echo(

@@ -948,6 +948,7 @@ class RerankCompressor(BaseDocumentCompressor):
             )
         else:
             from sentence_transformers import util
+            print("imported sentence_transformers.util")
 
             query_embedding = self.embedding_function(query, RAG_EMBEDDING_QUERY_PREFIX)
             document_embedding = self.embedding_function(

@@ -3,6 +3,8 @@ import logging
 import os
 import shutil
 import base64
+import time
+
 import redis
 
 from datetime import datetime
@@ -213,6 +215,8 @@ class PersistentConfig(Generic[T]):
 
 class AppConfig:
     _state: dict[str, PersistentConfig]
+
+    _update_times: dict[str, float]
     _redis: Optional[redis.Redis] = None
     _redis_key_prefix: str
 
@@ -224,6 +228,7 @@ class AppConfig:
     ):
         super().__setattr__("_state", {})
         super().__setattr__("_redis_key_prefix", redis_key_prefix)
+        super().__setattr__("_update_times", {})
         if redis_url:
             super().__setattr__(
                 "_redis",
@@ -240,6 +245,7 @@ class AppConfig:
             if self._redis:
                 redis_key = f"{self._redis_key_prefix}:config:{key}"
                 self._redis.set(redis_key, json.dumps(self._state[key].value))
+                self._update_times[key] = time.time()
 
     def __getattr__(self, key):
         if key not in self._state:
@@ -247,23 +253,95 @@ class AppConfig:
 
         # If Redis is available, check for an updated value
         if self._redis:
-            redis_key = f"{self._redis_key_prefix}:config:{key}"
-            redis_value = self._redis.get(redis_key)
+            last_update_time = self._update_times.get(key, 0)
+            time_since_update = time.time() - last_update_time
+            if time_since_update > 60.0:
+                redis_key = f"{self._redis_key_prefix}:config:{key}"
+                redis_value = self._redis.get(redis_key)
 
-            if redis_value is not None:
-                try:
-                    decoded_value = json.loads(redis_value)
+                if redis_value is not None:
+                    self._update_times[key] = time.time()
+                    try:
+                        decoded_value = json.loads(redis_value)
 
-                    # Update the in-memory value if different
-                    if self._state[key].value != decoded_value:
-                        self._state[key].value = decoded_value
-                        log.info(f"Updated {key} from Redis: {decoded_value}")
+                        # Update the in-memory value if different
+                        if self._state[key].value != decoded_value:
+                            self._state[key].value = decoded_value
+                            log.info(f"Updated {key} from Redis: {decoded_value}")
 
-                except json.JSONDecodeError:
-                    log.error(f"Invalid JSON format in Redis for {key}: {redis_value}")
+                    except json.JSONDecodeError:
+                        log.error(f"Invalid JSON format in Redis for {key}: {redis_value}")
 
         return self._state[key].value
 
+    def update_values(self, values: dict[str, any]) -> None:
+        """
+        Update (or create) multiple config values at once.
+        Any key not yet in _state will be auto-registered using
+        env_name=key, config_path=key, env_value=val.
+        """
+        now = time.time()
+        pipe = self._redis.pipeline() if self._redis else None
+
+        for key, val in values.items():
+            # Auto-register new keys via __setattr__
+            if key not in self._state:
+                # this will hit __setattr__, see isinstance(PersistentConfig) branch
+                setattr(self, key, PersistentConfig(env_name=key, config_path=key, env_value=val))
+
+            # Now set the new value (this also persists and pushes to Redis)
+            setattr(self, key, val)
+            self._update_times[key] = now
+
+            # If we're using a pipeline, queue it as well
+            if pipe:
+                redis_key = f"{self._redis_key_prefix}:config:{key}"
+                pipe.set(redis_key, json.dumps(val))
+
+        if pipe:
+            pipe.execute()
+
+    def get_values(self, keys: list[str] | None = None) -> dict[str, any]:
+        """
+        Fetch a batch of config values. If Redis is enabled,
+        pipelines GETs and updates in-memory; otherwise returns in-memory values.
+        """
+        keys = keys or list(self._state.keys())
+        result: dict[str, any] = {}
+        now = time.time()
+
+        if self._redis:
+            pipe = self._redis.pipeline()
+            for k in keys:
+                if k not in self._state:
+                    raise AttributeError(f"Config key '{k}' not found")
+                pipe.get(f"{self._redis_key_prefix}:config:{k}")
+            raw_vals = pipe.execute()
+
+            for k, raw in zip(keys, raw_vals):
+                if raw is not None:
+                    try:
+                        decoded = json.loads(raw)
+                        # only overwrite if different
+                        if self._state[k].value != decoded:
+                            self._state[k].value = decoded
+                            log.info(f"Updated {k} from Redis in batch: {decoded}")
+                        val = decoded
+                    except json.JSONDecodeError:
+                        log.error(f"Invalid JSON in Redis for {k}: {raw!r}")
+                        val = self._state[k].value
+                else:
+                    val = self._state[k].value
+
+                self._update_times[k] = now
+                result[k] = val
+        else:
+            for k in keys:
+                if k not in self._state:
+                    raise AttributeError(f"Config key '{k}' not found")
+                result[k] = self._state[k].value
+
+        return result
 
 ####################################
 # WEBUI_AUTH (Required for security)
@@ -1829,10 +1907,11 @@ VECTOR_DB = os.environ.get("VECTOR_DB", "chroma")
 CHROMA_DATA_PATH = f"{DATA_DIR}/vector_db"
 
 if VECTOR_DB == "chroma":
-    import chromadb
+    from chromadb import DEFAULT_DATABASE, DEFAULT_TENANT
+    print("Imported chromadb.(DEFAULT_DATABASE, DEFAULT_TENANT)")
 
-    CHROMA_TENANT = os.environ.get("CHROMA_TENANT", chromadb.DEFAULT_TENANT)
-    CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", chromadb.DEFAULT_DATABASE)
+    CHROMA_TENANT = os.environ.get("CHROMA_TENANT", DEFAULT_TENANT)
+    CHROMA_DATABASE = os.environ.get("CHROMA_DATABASE", DEFAULT_DATABASE)
     CHROMA_HTTP_HOST = os.environ.get("CHROMA_HTTP_HOST", "")
     CHROMA_HTTP_PORT = int(os.environ.get("CHROMA_HTTP_PORT", "8000"))
     CHROMA_CLIENT_AUTH_PROVIDER = os.environ.get("CHROMA_CLIENT_AUTH_PROVIDER", "")

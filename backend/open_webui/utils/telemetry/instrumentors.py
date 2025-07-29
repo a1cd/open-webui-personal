@@ -177,6 +177,7 @@ class Instrumentor(BaseInstrumentor):
         return []
 
     def _instrument(self, **kwargs):
+        from chromadb.telemetry.opentelemetry.fastapi import instrument_fastapi
         instrument_fastapi(app=self.app)
         SQLAlchemyInstrumentor().instrument(engine=self.db_engine)
         RedisInstrumentor().instrument(request_hook=redis_request_hook)
