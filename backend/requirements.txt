@@ -55,7 +55,7 @@ posthog==5.4.0
 pymilvus==2.5.0
 qdrant-client==1.14.3
 opensearch-py==2.8.0
-playwright==1.49.1 # Caution: version must match docker-compose.playwright.yaml
+#playwright==1.49.1 # Caution: version must match docker-compose.playwright.yaml
 elasticsearch==9.0.1
 pinecone==6.0.2
 
@@ -87,8 +87,8 @@ soundfile==0.13.1
 azure-ai-documentintelligence==1.0.2
 
 pillow==11.2.1
-opencv-python-headless==4.11.0.86
-rapidocr-onnxruntime==1.4.4
+#opencv-python-headless==4.11.0.86
+#rapidocr-onnxruntime==1.4.4
 rank-bm25==0.2.2
 
 onnxruntime==1.20.1

@@ -1869,7 +1869,7 @@ def search_web(request: Request, engine: str, query: str) -> list[SearchResult]:
             model=request.app.state.config.PERPLEXITY_MODEL,
             search_context_usage=request.app.state.config.PERPLEXITY_SEARCH_CONTEXT_USAGE,
         )
-    elif engine == "sougou":
+    elif (engine == "sougou") and False:
         if (
             request.app.state.config.SOUGOU_API_SID
             and request.app.state.config.SOUGOU_API_SK
