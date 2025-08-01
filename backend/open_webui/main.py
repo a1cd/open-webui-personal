@@ -99,7 +99,6 @@ from open_webui.models.users import UserModel, Users
 from open_webui.models.chats import Chats
 
 from open_webui.config import (
-    LICENSE_KEY,
     # Ollama
     ENABLE_OLLAMA_API,
     OLLAMA_BASE_URLS,
@@ -392,6 +391,7 @@ from open_webui.config import (
     reset_config,
 )
 from open_webui.env import (
+    LICENSE_KEY,
     AUDIT_EXCLUDED_PATHS,
     AUDIT_LOG_LEVEL,
     CHANGELOG,
